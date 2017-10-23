@@ -29,6 +29,11 @@
 				//onlyCountries: ['us', 'gb', 'ch', 'ca', 'do'],
 				preferredCountries: ['ca', 'gb', 'us']
 			});
+
+			$("#country_selector").on('click', function(e) {
+				$("#country_selector").countrySelect('openDropdown')
+				$("#country_selector").blur()
+			});
 		</script>
 	</body>
 </html>

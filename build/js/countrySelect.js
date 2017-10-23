@@ -29,7 +29,7 @@
 		Z: 90
 	}, windowLoaded = false;
 	// keep track of if the window.load event has fired as impossible to check after the fact
-	$(window).on('load', function() {
+	$(window).load(function() {
 		windowLoaded = true;
 	});
 	function Plugin(element, options) {
@@ -51,12 +51,6 @@
 			this._setInitialState();
 			// Start all of the event listeners: input keyup, selectedFlag click
 			this._initListeners();
-			// Return this when the auto country is resolved.
-			this.autoCountryDeferred = new $.Deferred();
-			// Get auto country.
-			this._initAutoCountry();
-
-			return this.autoCountryDeferred;
 		},
 		/********************
 		 *  PRIVATE METHODS
@@ -189,7 +183,7 @@
 				} else {
 					defaultCountry = this.preferredCountries.length ? this.preferredCountries[0] : this.countries[0];
 				}
-				this.defaultCountry = defaultCountry.iso2;
+				this.selectCountry(defaultCountry.iso2);
 			}
 		},
 		// initialise the main event listeners: input keyup, and click selected flag
@@ -215,50 +209,6 @@
 					that._showDropdown();
 				}
 			});
-			// Despite above note, added blur to ensure partially spelled country
-			// with correctly chosen flag is spelled out on blur. Also, correctly
-			// selects flag when field is autofilled
-			this.countryInput.on("blur" + this.ns, function() {
-				if (that.countryInput.val() != that.getSelectedCountryData().name) {
-					that.setCountry(that.countryInput.val());
-				}
-				that.countryInput.val(that.getSelectedCountryData().name);
-			});
-		},
-		_initAutoCountry: function() {
-			if (this.options.initialCountry === "auto") {
-				this._loadAutoCountry();
-			} else {
-				this.selectCountry(this.defaultCountry);
-				this.autoCountryDeferred.resolve();
-			}
-		},
-		// perform the geo ip lookup
-		_loadAutoCountry: function() {
-			var that = this;
-
-			// 3 options:
-			// 1) already loaded (we're done)
-			// 2) not already started loading (start)
-			// 3) already started loading (do nothing - just wait for loading callback to fire)
-			if ($.fn[pluginName].autoCountry) {
-				this.handleAutoCountry();
-			} else if (!$.fn[pluginName].startedLoadingAutoCountry) {
-				// don't do this twice!
-				$.fn[pluginName].startedLoadingAutoCountry = true;
-
-				if (typeof this.options.geoIpLookup === 'function') {
-					this.options.geoIpLookup(function(countryCode) {
-						$.fn[pluginName].autoCountry = countryCode.toLowerCase();
-						// tell all instances the auto country is ready
-						// TODO: this should just be the current instances
-						// UPDATE: use setTimeout in case their geoIpLookup function calls this callback straight away (e.g. if they have already done the geo ip lookup somewhere else). Using setTimeout means that the current thread of execution will finish before executing this, which allows the plugin to finish initialising.
-						setTimeout(function() {
-							$(".country-select input").countrySelect("handleAutoCountry");
-						});
-					});
-				}
-			}
 		},
 		// Focus input and put the cursor at the end
 		_focus: function() {
@@ -387,7 +337,7 @@
 			if (value) {
 				var countryCodes = [];
 				var matcher = new RegExp("^"+value, "i");
-				for (var i = 0; i < this.countries.length; i++) {
+				for (var i =0; i < this.countries.length; i++) {
 					if (this.countries[i].name.match(matcher)) {
 						countryCodes.push(this.countries[i].iso2);
 					}
@@ -449,8 +399,9 @@
 			this._updateName(countryCode);
 			this.countryInput.trigger("change");
 			this.countryCodeInput.trigger("change");
+
 			// focus the input
-			this._focus();
+			// this._focus();
 		},
 		// close the dropdown and unbind any listeners
 		_closeDropdown: function() {
@@ -486,18 +437,6 @@
 		/********************
 		 *  PUBLIC METHODS
 		 ********************/
-		// this is called when the geoip call returns
-		handleAutoCountry: function() {
-			if (this.options.initialCountry === "auto") {
-				// we must set this even if there is an initial val in the input: in case the initial val is invalid and they delete it - they should see their auto country
-				this.defaultCountry = $.fn[pluginName].autoCountry;
-				// if there's no initial value in the input, then update the flag
-				if (!this.countryInput.val()) {
-					this.selectCountry(this.defaultCountry);
-				}
-				this.autoCountryDeferred.resolve();
-			}
-		},
 		// get the country data for the currently selected flag
 		getSelectedCountryData: function() {
 			// rely on the fact that we only set 2 classes on the selected flag element:
@@ -507,7 +446,6 @@
 		},
 		// update the selected flag
 		selectCountry: function(countryCode) {
-			countryCode = countryCode.toLowerCase();
 			// check if already selected
 			if (!this.selectedFlagInner.hasClass(countryCode)) {
 				this._selectFlag(countryCode);
@@ -518,6 +456,14 @@
 		setCountry: function(country) {
 			this.countryInput.val(country);
 			this._updateFlagFromInputVal();
+		},
+		openDropdown: function() {
+			if (this.countryList.hasClass("hide") && !this.countryInput.prop("disabled")) {
+				this._showDropdown();
+			}
+		},
+		closeDropdown: function() {
+			this._closeDropdown()
 		},
 		// remove plugin
 		destroy: function() {
