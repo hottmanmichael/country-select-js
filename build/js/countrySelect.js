@@ -457,12 +457,12 @@
 			this.countryInput.val(country);
 			this._updateFlagFromInputVal();
 		},
-		openDropdown: function() {
+		showDropdown: function() {
 			if (this.countryList.hasClass("hide") && !this.countryInput.prop("disabled")) {
 				this._showDropdown();
 			}
 		},
-		closeDropdown: function() {
+		hideDropdown: function() {
 			this._closeDropdown()
 		},
 		// remove plugin

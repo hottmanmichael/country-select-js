@@ -40,19 +40,19 @@ Try it for yourself using the included demo.html.
 3. Add the plugin script and initialise it on your input element
   ```html
   <input type="text" id="country">
-  
+
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="build/js/countrySelect.min.js"></script>
   <script>
     $("#country").countrySelect();
   </script>
   ```
-  
+
 4. Optional: add an extra input field (with type hidden or text) named the same as your selector input appended with "_code". This will automatically be updated with the [ISO 3166-1 alpha-2](http://en.wikipedia.org/wiki/ISO_3166-1_alpha-2) code for the selected country.
   ```html
   <input type="text" id="country" />
   <input type="hidden" id="country_code" />
-  
+
   <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
   <script src="build/js/countrySelect.min.js"></script>
   <script>
@@ -113,6 +113,17 @@ Insert a country name, and update the selected flag accordingly.
 $("#country").countrySelect("setCountry", "United States");
 ```
 
+**showDropdown**
+Programmatically show dropdown
+```js
+$("#country").countrySelect("showDropdown");
+```
+
+**hideDropdown**
+Programmatically hide dropdown
+```js
+$("#country").countrySelect("hideDropdown");
+```
 
 ## Static Methods
 **getCountryData**  
